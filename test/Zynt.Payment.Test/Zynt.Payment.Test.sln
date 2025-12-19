@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zynt.Payment.Test", "Zynt.Payment.Test\Zynt.Payment.Test.csproj", "{F01378CE-BD3E-446E-8445-0C2616431083}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zynt.Payment", "..\..\src\Zynt.Payment\Zynt.Payment.csproj", "{259D8A4B-E598-43C2-ABC7-13822FAD3AD6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zynt.Payment.Primitives", "..\..\src\Zynt.Payment.Primitives\Zynt.Payment.Primitives.csproj", "{465B7603-EC11-4CE4-9D35-D6A3184C8E30}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F01378CE-BD3E-446E-8445-0C2616431083}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F01378CE-BD3E-446E-8445-0C2616431083}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F01378CE-BD3E-446E-8445-0C2616431083}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F01378CE-BD3E-446E-8445-0C2616431083}.Release|Any CPU.Build.0 = Release|Any CPU
+		{259D8A4B-E598-43C2-ABC7-13822FAD3AD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{259D8A4B-E598-43C2-ABC7-13822FAD3AD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{259D8A4B-E598-43C2-ABC7-13822FAD3AD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{259D8A4B-E598-43C2-ABC7-13822FAD3AD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{465B7603-EC11-4CE4-9D35-D6A3184C8E30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{465B7603-EC11-4CE4-9D35-D6A3184C8E30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{465B7603-EC11-4CE4-9D35-D6A3184C8E30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{465B7603-EC11-4CE4-9D35-D6A3184C8E30}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

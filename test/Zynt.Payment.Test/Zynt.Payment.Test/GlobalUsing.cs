@@ -1,0 +1,1 @@
+global using Constants = Zynt.Payment.Test.Constants;
