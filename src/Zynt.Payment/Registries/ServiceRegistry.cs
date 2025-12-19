@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Routing;
+using Zynt.Payment.Interfaces;
 
 namespace Zynt.Payment.Registries;
 

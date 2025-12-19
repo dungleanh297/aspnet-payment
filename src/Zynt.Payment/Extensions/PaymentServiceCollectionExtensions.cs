@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Zynt.Payment.DependencyInjection;
 using Zynt.Payment.Infrastructure;
+using Zynt.Payment.Interfaces;
 using Zynt.Payment.Registries;
 
 namespace Zynt.Payment.Extensions;
@@ -20,8 +21,8 @@ public static class PaymentDependencyInjectionExtensions
         
         services.AddSingleton<IValidateOptions<PaymentOptions>, PaymentOptionsValidator>();
         
-        services.AddScoped<HandlerInvoker>();
-        services.AddScoped<IPaymentProvider, PaymentProvider>();
+        services.AddScoped<HandlerActivator>();
+        services.AddScoped<IPaymentFacade, PaymentFacade>();
         services.AddScoped<PaymentServiceProvider>();
         services.AddSingleton<PaymentMiddleware>();
 

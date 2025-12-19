@@ -29,5 +29,7 @@ public class PaymentRequest
     public required string Identifier { get; init; }
     
     public required string SchemeName { get; init; }
+
+    public required string RedirectUri { get; set; }
     
 }

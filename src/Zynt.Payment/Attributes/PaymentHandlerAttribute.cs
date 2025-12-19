@@ -1,4 +1,4 @@
-﻿namespace Zynt.Payment;
+﻿namespace Zynt.Payment.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 public class PaymentHandlerAttribute : Attribute

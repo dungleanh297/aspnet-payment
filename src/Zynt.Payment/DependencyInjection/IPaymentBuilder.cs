@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Zynt.Payment.Interfaces;
 
 namespace Zynt.Payment.DependencyInjection;
 

@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zynt.Payment", "Zynt.Paymen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zynt.Payment.Primitives", "Zynt.Payment.Primitives\Zynt.Payment.Primitives.csproj", "{73ED6699-E596-5DFA-5596-9D526E724E29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zynt.Payment.VNPay", "Zynt.Payment.Vnpay\Zynt.Payment.VNPay.csproj", "{9FD56F23-2E3D-7587-54EC-AFF602655836}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{73ED6699-E596-5DFA-5596-9D526E724E29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73ED6699-E596-5DFA-5596-9D526E724E29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73ED6699-E596-5DFA-5596-9D526E724E29}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9FD56F23-2E3D-7587-54EC-AFF602655836}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9FD56F23-2E3D-7587-54EC-AFF602655836}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9FD56F23-2E3D-7587-54EC-AFF602655836}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9FD56F23-2E3D-7587-54EC-AFF602655836}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

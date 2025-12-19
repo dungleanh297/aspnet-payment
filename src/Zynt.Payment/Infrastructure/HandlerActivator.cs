@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
 using Zynt.Payment.Exceptions;
+using Zynt.Payment.Interfaces;
 using Zynt.Payment.Registries;
 
-namespace Zynt.Payment;
-
+namespace Zynt.Payment.Infrastructure;
 
 internal sealed class HandlerActivator
 {
@@ -24,25 +24,35 @@ internal sealed class HandlerActivator
             throw new PaymentHandlerNotFoundException(null, result, $"Cannot find the handler implementation with name \"{result.HandlerName}\"");
         }
 
-        var handler = ActivatorUtilities.CreateInstance(_serviceProvider, handlerInfo.Type);
-
-        Task handlerTask;
-        var implementationTypes = handlerInfo.ImplementationTypes;
-
-
-        var isAsyncDisposable = implementationTypes.HasFlag(HandlerImplementationTypes.AsyncDisposable);
-        var isDisposable = implementationTypes.HasFlag(HandlerImplementationTypes.Disposable);
+        Task handlerTask = Task.CompletedTask;
+        object? handler = null;
+        HandlerImplementationTypes implementationTypes = handlerInfo.ImplementationTypes;
+        bool isAsyncDisposable = implementationTypes.HasFlag(HandlerImplementationTypes.AsyncDisposable);
+        bool isDisposable = implementationTypes.HasFlag(HandlerImplementationTypes.Disposable);
 
         if (implementationTypes.HasFlag(HandlerImplementationTypes.OnSuccess) && result.Status == PaymentStatus.Success)
         {
+            handler = ActivatorUtilities.CreateInstance(_serviceProvider, handlerInfo.Type);
             handlerTask = Unsafe.As<IPaymentSuccessHandler>(handler).OnTransactionSuccessAsync(result);
         }
-        else
+
+        if (handler is null)
         {
-            handlerTask = Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        if (!handlerTask.IsCompleted && (isAsyncDisposable || isDisposable))
+        if (handlerTask.IsCompleted)
+        {
+            if (isAsyncDisposable)
+            {
+                return Unsafe.As<IAsyncDisposable>(handler).DisposeAsync().AsTask();
+            }
+            else if (isDisposable)
+            {
+                Unsafe.As<IDisposable>(handler).Dispose();
+            }
+        }
+        else if (!handlerTask.IsCompleted && (isAsyncDisposable || isDisposable))
         {
             return AwaitThenDispose(handlerTask, handler, isAsyncDisposable);
         }

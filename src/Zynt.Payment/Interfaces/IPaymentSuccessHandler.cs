@@ -1,4 +1,4 @@
-﻿namespace Zynt.Payment;
+﻿namespace Zynt.Payment.Interfaces;
 
 /// <summary>
 /// Defines a contract for handling payment when a transaction completes successfully.

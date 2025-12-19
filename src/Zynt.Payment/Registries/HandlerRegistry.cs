@@ -1,12 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Zynt.Payment.Attributes;
+using Zynt.Payment.Interfaces;
 
 namespace Zynt.Payment.Registries;
 
 internal sealed class HandlerRegistry
 {
     private readonly Dictionary<string, HandlerImplementationInfo> _info = new ();
-
+    
     public void AddFromAssembly(Assembly assembly)
     {
         ArgumentNullException.ThrowIfNull(assembly);
@@ -31,7 +33,7 @@ internal sealed class HandlerRegistry
     {
         foreach (var type in assembly.DefinedTypes)
         {
-            if (!type.IsClass)
+            if (!type.IsClass || !type.Name.EndsWith(Constants.HandlerSuffix))
             {
                 continue;
             }

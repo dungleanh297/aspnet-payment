@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Zynt.Payment.Interfaces;
+using Zynt.Payment.Registries;
+
 
 namespace Zynt.Payment;
 

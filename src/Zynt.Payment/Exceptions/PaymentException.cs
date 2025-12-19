@@ -1,5 +1,3 @@
-using System;
-
 namespace Zynt.Payment.Exceptions;
 
 public abstract class PaymentException : Exception
