@@ -27,9 +27,9 @@ internal sealed class ServiceRegistry
         _servicesTypes.Add(descriptor.Scheme, serviceTypeInfo);
     }
 
-    public bool TryGetServiceTypeInfo(string scheme, [NotNullWhen(true)] out ServiceTypeInfo serviceTypeInfo)
+    public bool TryGetServiceTypeInfo(string serviceName, [NotNullWhen(true)] out ServiceTypeInfo serviceTypeInfo)
     {
-        return _servicesTypes.TryGetValue(scheme, out serviceTypeInfo);
+        return _servicesTypes.TryGetValue(serviceName, out serviceTypeInfo);
     }
 
     public IEnumerable<PaymentServiceDescriptor> GetAllServices()

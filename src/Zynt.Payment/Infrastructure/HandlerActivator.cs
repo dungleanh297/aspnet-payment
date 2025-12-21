@@ -6,12 +6,12 @@ using Zynt.Payment.Registries;
 
 namespace Zynt.Payment.Infrastructure;
 
-internal sealed class HandlerActivator
+internal sealed class HandleActivator
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly HandlerRegistry _handlerRegistry;
 
-    public HandlerActivator(IServiceProvider serviceProvider, HandlerRegistry handlerRegistry)
+    public HandleActivator(IServiceProvider serviceProvider, HandlerRegistry handlerRegistry)
     {
         _serviceProvider = serviceProvider;
         _handlerRegistry = handlerRegistry;

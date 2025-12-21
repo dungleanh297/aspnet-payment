@@ -22,9 +22,9 @@ internal class PaymentFacade : IPaymentFacade
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
 
-        if (!_serviceRegistry.TryGetServiceTypeInfo(request.SchemeName, out var serviceTypeInfo))
+        if (!_serviceRegistry.TryGetServiceTypeInfo(request.ServiceName, out var serviceTypeInfo))
         {
-            throw new PaymentServiceNotFoundException(request, $"Unable to find payment service with scheme name: {request.SchemeName}");
+            throw new PaymentServiceNotFoundException(request, $"Unable to find payment service with service name: {request.ServiceName}");
         }
 
         if (!serviceTypeInfo.IsCurrencySupported(request.Currency))

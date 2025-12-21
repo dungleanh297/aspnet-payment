@@ -1,9 +1,7 @@
 ﻿namespace Zynt.Payment;
 
-public class PaymentRequest
+public sealed class PaymentRequest
 {
-    public const string DefaultRedirectAlias = "Default";
-    
     private long _amount;
 
     public required long Amount
@@ -28,7 +26,7 @@ public class PaymentRequest
     
     public required string Identifier { get; init; }
     
-    public required string SchemeName { get; init; }
+    public required string ServiceName { get; init; }
 
     public required string RedirectUri { get; set; }
     

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Zynt.Payment.Attributes;
+using Zynt.Payment.DependencyInjection;
 using Zynt.Payment.Interfaces;
 using Zynt.Payment.Registries;
 
@@ -19,23 +20,53 @@ internal class PaymentMiddleware : IMiddleware
     {
         Endpoint? endpoint = context.GetEndpoint();
 
-        if (endpoint == null || endpoint.Metadata.GetMetadata<PaymentRedirectionHandlerAttribute>() is null)
+        if (endpoint == null)
         {
             return next(context);
         }
 
-        string? providerName = context.Request.Query["provider"];
-
-        if (providerName is null || _serviceRegistry.TryGetServiceTypeInfo(providerName, out var serviceTypeInfo))
+        if (endpoint.Metadata.GetMetadata<RequirePaymentContextAttribute>() is not null)
         {
-            TypedResults.BadRequest().ExecuteAsync(context);
-            
-            return Task.CompletedTask;
+            return InjectWrappedServiceProviderAsync(context, next);
         }
 
-        var paymentService = (IPaymentService) context.RequestServices.GetRequiredService(serviceTypeInfo.Type);
+        if (endpoint.Metadata.GetMetadata<PaymentRedirectionHandlerAttribute>() is not null)
+        {
+            string? providerName = context.Request.Query["provider"];
 
-        return InvokeAsyncCore(context, paymentService, next);
+            if (providerName is null || _serviceRegistry.TryGetServiceTypeInfo(providerName, out var serviceTypeInfo))
+            {
+                TypedResults.BadRequest().ExecuteAsync(context);
+                
+                return Task.CompletedTask;
+            }
+
+            var paymentService = (IPaymentService) context.RequestServices.GetRequiredService(serviceTypeInfo.Type);
+
+            return InvokeAsyncCore(context, paymentService, next);
+        }
+
+        return next(context);
+
+    }
+
+    private static async Task InjectWrappedServiceProviderAsync(HttpContext context, RequestDelegate next)
+    {
+        var parentContext = context.RequestServices;
+        context.RequestServices = new PersistentContextServiceProvider<PaymentContext>(parentContext);
+
+        try
+        {
+            await next(context);
+        }
+        finally
+        {
+            // If somewhere else tamped and forgot to restore the original IServiceProvider, that will probably screw up!
+            if (context.RequestServices is PersistentContextServiceProvider<PaymentContext> wrappedServiceProvider)
+            {
+                context.RequestServices = wrappedServiceProvider.Unwrap();
+            }
+        }
     }
 
     public static async Task InvokeAsyncCore(HttpContext context, IPaymentService paymentService, RequestDelegate next)
@@ -46,7 +77,5 @@ internal class PaymentMiddleware : IMiddleware
         {
             context.Features.Set(result);
         }
-
-        await next(context);
     }
 }

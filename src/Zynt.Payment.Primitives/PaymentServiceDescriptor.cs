@@ -8,9 +8,9 @@
 public sealed class PaymentServiceDescriptor
 {
     /// <summary>
-    /// Gets the unique scheme identifier for the payment service (e.g., "paypal", "stripe").
+    /// Gets the unique identifier for the payment service (e.g., "paypal", "stripe").
     /// </summary>
-    public required string Scheme { get; init; }
+    public required string Name { get; init; }
 
     /// <summary>
     /// Gets the human-readable display name of the payment service (e.g., "PayPal", "Stripe").

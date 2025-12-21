@@ -1,6 +1,6 @@
 ﻿namespace Zynt.Payment;
 
-public enum PaymentStatus
+public enum PaymentStatus : int
 {
     Success = 0,
 
