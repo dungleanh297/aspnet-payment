@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Zynt.Payment.DependencyInjection;
 using Zynt.Payment.Infrastructure;
 using Zynt.Payment.Interfaces;
+using Zynt.Payment.Models;
 using Zynt.Payment.Registries;
 
 namespace Zynt.Payment.Extensions;
@@ -21,9 +21,12 @@ public static class PaymentDependencyInjectionExtensions
         
         services.AddSingleton<IValidateOptions<PaymentOptions>, PaymentOptionsValidator>();
         
-        services.AddScoped<HandlerActivator>();
+        services.AddScoped<HandleActivator>();
         services.AddScoped<IPaymentFacade, PaymentFacade>();
+        services.AddScoped<IPaymentHandleActivator, HandleActivator>();
         services.AddScoped<PaymentServiceProvider>();
+        services.AddScoped<IPaymentContextAccessor, PaymentContextAccessor>();
+        services.Add(ServiceDescriptor.Scoped(typeof(IContextAccessor<>), typeof(ContextAccessor<>)));
         services.AddSingleton<PaymentMiddleware>();
 
         var serviceRegistry = GetServiceFromCollection<ServiceRegistry>(services);

@@ -4,7 +4,7 @@ namespace Zynt.Payment.Interfaces;
 
 public interface IPaymentService
 {
-    Task<PaymentRequestUrl> CreatePaymentUrlAsync(PaymentRequest request);
+    Task<PaymentRequestUrls> CreatePaymentUrlAsync(PaymentRequest request);
 
-    Task<PaymentResult?> GetResultFromRedirectionAsync(IEnumerable<KeyValuePair<string, string?>> queryParameter);
+    Task<PaymentResult?> GetResultFromRedirectionAsync(Dictionary<string, string?> queryParameters);
 }

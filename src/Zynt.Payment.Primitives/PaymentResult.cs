@@ -24,14 +24,14 @@ public sealed class PaymentResult : IEquatable<PaymentResult>
     public required string HandlerName { get; init; }
     
     public required string Identifier { get; init; }
-
-    public required string Scheme { get; init; }
+    
+    public required string ServiceName { get; init; }
     
     public PaymentStatus Status { get; init; }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(_amount, CreatedDate, Currency, HandlerName, Identifier, Scheme, (int)Status);
+        return HashCode.Combine(_amount, CreatedDate, Currency, HandlerName, Identifier, ServiceName, (int)Status);
     }
     
     public bool Equals(PaymentResult? other)
@@ -43,7 +43,7 @@ public sealed class PaymentResult : IEquatable<PaymentResult>
                && Currency == other.Currency
                && HandlerName == other.HandlerName
                && Identifier == other.Identifier
-               && Scheme == other.Scheme
+               && ServiceName == other.ServiceName
                && Status == other.Status;
     }
 

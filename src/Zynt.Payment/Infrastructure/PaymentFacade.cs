@@ -18,7 +18,7 @@ internal class PaymentFacade : IPaymentFacade
         _serviceRegistry = serviceRegistry;
     }
 
-    public Task<PaymentRequestUrl> CreatePaymentUrlAsync(PaymentRequest request)
+    public Task<PaymentRequestUrls> CreatePaymentUrlAsync(PaymentRequest request)
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
 
@@ -33,8 +33,9 @@ internal class PaymentFacade : IPaymentFacade
         }
 
         var paymentService = Unsafe.As<IPaymentService>(_serviceProvider.GetRequiredService(serviceTypeInfo.Type));
+        var result = paymentService.CreatePaymentUrlAsync(request);
 
-        return paymentService.CreatePaymentUrlAsync(request);
+        return result;
 
     }
 

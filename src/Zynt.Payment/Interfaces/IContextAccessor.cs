@@ -1,4 +1,6 @@
-public interface IContextAccessor<TContext> where TContext : class
+namespace Zynt.Payment.Interfaces;
+
+internal interface IContextAccessor<TContext>
 {
     public TContext? Value { get; set; }
 }

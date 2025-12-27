@@ -11,7 +11,7 @@ public class PaymentHandlerAttribute : Attribute
 
         if (!Constants.ValidIdentifierNameRgx.IsMatch(name))
         {
-            throw new ArgumentException($"Invalid payment handler name: {name}. Handler name must consist of 4 to 8 lowercase letters.");
+            throw new ArgumentException($"Invalid payment handler name: {name}. Handler name must contains only lowercase characters and hyphen and its length must be between 4 and 32");
         }
 
         Name = name;

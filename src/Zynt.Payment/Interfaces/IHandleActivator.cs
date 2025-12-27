@@ -1,8 +1,6 @@
-using System;
-
 namespace Zynt.Payment.Interfaces;
 
 public interface IPaymentHandleActivator
 {
-    Task InvokeAsync(string handlerName, PaymentResult result);
+    Task InvokeAsync(PaymentResult result);
 }

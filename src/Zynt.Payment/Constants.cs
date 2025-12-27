@@ -4,7 +4,7 @@ namespace Zynt.Payment;
 
 internal static partial class Constants
 {
-    [GeneratedRegex("[a-z]{4,8}")]
+    [GeneratedRegex("[a-z\\-]{4,32}")]
     public static partial Regex ValidIdentifierNameRgx { get; }
 
     public const string HandlerSuffix = "Handler";

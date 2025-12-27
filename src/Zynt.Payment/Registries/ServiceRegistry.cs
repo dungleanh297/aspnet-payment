@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Routing;
 using Zynt.Payment.Interfaces;
+using Zynt.Payment.Registries;
 
 namespace Zynt.Payment.Registries;
 
@@ -24,7 +25,7 @@ internal sealed class ServiceRegistry
             Type = typeof(TService),
         };
 
-        _servicesTypes.Add(descriptor.Scheme, serviceTypeInfo);
+        _servicesTypes.Add(descriptor.Name, serviceTypeInfo);
     }
 
     public bool TryGetServiceTypeInfo(string serviceName, [NotNullWhen(true)] out ServiceTypeInfo serviceTypeInfo)

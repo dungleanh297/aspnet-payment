@@ -1,12 +1,11 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using Zynt.Payment.Interfaces;
 
-/// <summary>
-/// Encapsulate information about the payment request, indirect from <see cref="HttpContext" /> 
-/// </summary>
-public sealed class PaymentContext
+namespace Zynt.Payment.Models;
+
+internal class PaymentContext : IPaymentContext
 {
-    public required ConnectionInfo Connection { get; init; }
+    public required ConnectionInfo Connection { get; set; }
 
-    public required ClaimsPrincipal? User { get; init; }
+    public required string BaseUrl { get; set; }
 }

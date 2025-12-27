@@ -1,6 +1,6 @@
 namespace Zynt.Payment.Primitives;
 
-public readonly struct PaymentRequestUrl
+public readonly struct PaymentRequestUrls
 {
     public required string HttpUrl { get; init; }
 

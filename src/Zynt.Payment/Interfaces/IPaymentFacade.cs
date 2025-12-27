@@ -4,7 +4,7 @@ namespace Zynt.Payment.Interfaces;
 
 public interface IPaymentFacade
 {
-    Task<PaymentRequestUrl> CreatePaymentUrlAsync(PaymentRequest request);
+    Task<PaymentRequestUrls> CreatePaymentUrlAsync(PaymentRequest request);
 
     IEnumerable<PaymentServiceDescriptor> GetAllServices();
 }
