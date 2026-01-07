@@ -27,6 +27,8 @@ public static class PaymentDependencyInjectionExtensions
         services.AddScoped<PaymentServiceProvider>();
         services.AddScoped<IPaymentContextAccessor, PaymentContextAccessor>();
         services.Add(ServiceDescriptor.Scoped(typeof(IContextAccessor<>), typeof(ContextAccessor<>)));
+        
+        services.AddSingleton<IPaymentContextFactory, DefaultPaymentContextFactory>();
         services.AddSingleton<PaymentMiddleware>();
 
         var serviceRegistry = GetServiceFromCollection<ServiceRegistry>(services);

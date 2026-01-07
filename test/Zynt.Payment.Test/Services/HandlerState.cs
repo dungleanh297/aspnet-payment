@@ -3,11 +3,14 @@ namespace Zynt.Payment.Test;
 public sealed class HandlerState
 {
     private PaymentResult? _result;
-    private bool _disposed;
+    private bool _disposable;
+    private bool _asyncDisposable;
 
     public PaymentResult? Result => _result;
 
-    public bool Disposed => _disposed;
+    public bool Disposed => _disposable || _asyncDisposable;
+    
+    public bool DisposedWithAsyncDisposable => _asyncDisposable;
 
     public bool InvokedSuccessHandler => _result is not null;
 
@@ -18,10 +21,19 @@ public sealed class HandlerState
         HandlerType = handlerType;
     }
 
-    public void MarkAsDisposed()
+    public void MarkAsDisposed(bool isAsyncDisposable = false)
     {
         CheckDisposed();
-        _disposed = true;
+        
+        if (isAsyncDisposable)
+        {
+            _asyncDisposable = true;
+        }
+        else
+        {
+            _disposable = true;
+        }
+        
     }
 
     public void MarkAsInvokedSuccessHandler(PaymentResult result)
@@ -73,6 +85,9 @@ public sealed class HandlerState
             return true;
         }
         
-        return InvokedSuccessHandler == other.InvokedSuccessHandler && Disposed == other.Disposed && HandlerType == other.HandlerType;
+        return InvokedSuccessHandler == other.InvokedSuccessHandler 
+               && Disposed == other.Disposed
+               && DisposedWithAsyncDisposable == other.DisposedWithAsyncDisposable 
+               && HandlerType == other.HandlerType;
     }
 }

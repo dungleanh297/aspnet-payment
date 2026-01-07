@@ -36,28 +36,7 @@ internal sealed class HandleActivator : IPaymentHandleActivator
             handlerTask = Unsafe.As<IPaymentSuccessHandler>(handler).OnTransactionSuccessAsync(result);
         }
 
-        if (handler is null)
-        {
-            return Task.CompletedTask;
-        }
-
-        if (handlerTask.IsCompleted)
-        {
-            if (isAsyncDisposable)
-            {
-                return Unsafe.As<IAsyncDisposable>(handler).DisposeAsync().AsTask();
-            }
-            else if (isDisposable)
-            {
-                Unsafe.As<IDisposable>(handler).Dispose();
-            }
-        }
-        else if (!handlerTask.IsCompleted && (isAsyncDisposable || isDisposable))
-        {
-            return AwaitThenDispose(handlerTask, handler, isAsyncDisposable);
-        }
-
-        return handlerTask;
+        return (isDisposable || isAsyncDisposable) ? AwaitThenDispose(handlerTask, handler, isAsyncDisposable) : handlerTask;
     }
 
     private static async Task AwaitThenDispose(Task task, object handler, bool isAsyncDisposable)

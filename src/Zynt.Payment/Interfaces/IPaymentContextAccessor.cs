@@ -1,6 +1,6 @@
-using Zynt.Payment.Interfaces;
+using Zynt.Payment.Models;
 
 public interface IPaymentContextAccessor
 {
-    IPaymentContext? Value { get; set; }
+    PaymentContext? Value { get; set; }
 }

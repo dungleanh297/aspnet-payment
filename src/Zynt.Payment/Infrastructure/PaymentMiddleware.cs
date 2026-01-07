@@ -12,12 +12,12 @@ namespace Zynt.Payment.Infrastructure;
 internal class PaymentMiddleware : IMiddleware
 {
     private readonly ServiceRegistry _serviceRegistry;
-    private readonly PaymentOptions _paymentOptions;
-
+    private readonly bool _persistContext;
+    
     public PaymentMiddleware(ServiceRegistry serviceRegistry, IOptions<PaymentOptions> options)
     {
         _serviceRegistry = serviceRegistry;
-        _paymentOptions = options.Value;
+        _persistContext = options.Value.PersistPaymentContext;
     }
 
     public Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -32,9 +32,11 @@ internal class PaymentMiddleware : IMiddleware
         if (endpoint.Metadata.GetMetadata<RequirePaymentContextAttribute>() is not null)
         {
             var accessor = context.RequestServices.GetRequiredService<IPaymentContextAccessor>();
-            accessor.Value = CreatePaymentContext(context, _paymentOptions.BaseUrl);
+            var contextFactory = context.RequestServices.GetRequiredService<IPaymentContextFactory>();
+            
+            accessor.Value = contextFactory.Create(context);
 
-            return _paymentOptions.PersistPaymentContext ? InjectWrappedServiceProviderAsync(context, next) : next(context);
+            return _persistContext ? InjectWrappedServiceProviderAsync(context, next) : next(context);
         }
 
         if (endpoint.Metadata.GetMetadata<PaymentRedirectionHandlerAttribute>() is not null)
@@ -48,7 +50,7 @@ internal class PaymentMiddleware : IMiddleware
 
             var paymentService = (IPaymentService) context.RequestServices.GetRequiredService(serviceTypeInfo.Type);
 
-            return SetPaymentResultFromRedirectionAsync(context, paymentService, next);
+            return SetPaymentResultFromRedirection(context, paymentService, next);
         }
 
         return next(context);
@@ -58,40 +60,41 @@ internal class PaymentMiddleware : IMiddleware
     private static async Task InjectWrappedServiceProviderAsync(HttpContext context, RequestDelegate next)
     {
         var parentContext = context.RequestServices;
-        context.RequestServices = new PersistentContextServiceProvider<IPaymentContext>(parentContext);
+        context.RequestServices = new PersistentContextServiceProvider<PaymentContext>(parentContext);
         
+        // Restore the original service provider to avoid side effect when returning to another middleware
         try
         {
             await next(context);
         }
         finally
         {
-            if (context.RequestServices is PersistentContextServiceProvider<IPaymentContext> wrappedServiceProvider)
+            if (context.RequestServices is PersistentContextServiceProvider<PaymentContext> wrappedServiceProvider)
             {
                 context.RequestServices = wrappedServiceProvider.Unwrap();
             }
         }
     }
 
-    private static IPaymentContext CreatePaymentContext(HttpContext httpContext, string? baseUrl)
+    private static Task SetPaymentResultFromRedirection(HttpContext context, IPaymentService paymentService, RequestDelegate next)
     {
-        return new PaymentContext
-        {
-            Connection = httpContext.Connection,
-            BaseUrl = baseUrl ?? $"{httpContext.Request.Scheme}://${httpContext.Request.Host}",
-        };
-    }
+        Task<PaymentResult?> resultAsTask = paymentService.GetResultFromRedirectionAsync(ConvertQueriesToDictionary(context.Request.Query));
 
-    private static async Task SetPaymentResultFromRedirectionAsync(HttpContext context, IPaymentService paymentService, RequestDelegate next)
-    {
-        PaymentResult? result = await paymentService.GetResultFromRedirectionAsync(ConvertQueriesToDictionary(context.Request.Query));
-
-        if (result is not null)
+        if (resultAsTask.IsCompleted)
         {
+            PaymentResult? result = resultAsTask.Result;
             context.Features.Set(result);
+            return next(context);
         }
 
-        await next(context);
+        return AwaitResult(resultAsTask, context, next);
+
+        static async Task AwaitResult(Task<PaymentResult?> resultAsTask, HttpContext context, RequestDelegate next)
+        {
+            var result = await resultAsTask;
+            context.Features.Set(result);
+            await next(context);
+        }
     }
 
     private static Dictionary<string, string?> ConvertQueriesToDictionary(IQueryCollection keyValuePairs)

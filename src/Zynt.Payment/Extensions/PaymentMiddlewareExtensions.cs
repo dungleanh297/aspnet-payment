@@ -6,13 +6,19 @@ using Zynt.Payment.Registries;
 
 namespace Zynt.Payment.Extensions;
 
-public static class PaymentEndpointRouteExtensions
+public static class PaymentMiddlewareExtensions
 {
     public static void UsePayment(this IApplicationBuilder builder)
     {
-        builder.UseMiddleware<PaymentMiddleware>();
+        var registry = builder.ApplicationServices.GetService<ServiceRegistry>();
 
-        var registry = builder.ApplicationServices.GetRequiredService<ServiceRegistry>();
+        if (registry is null)
+        {
+            throw new InvalidOperationException(
+                "Unable to find required service for payment middleware. Please add all the required services by calling 'IServiceCollection.AddPayment' in the application startup code");
+        }
+        
+        builder.UseMiddleware<PaymentMiddleware>();
 
         if (builder is IEndpointRouteBuilder routeBuilder)
         {

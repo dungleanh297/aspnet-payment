@@ -1,5 +1,6 @@
 using System.Net;
 using Zynt.Payment.Interfaces;
+using Zynt.Payment.Models;
 using Zynt.Payment.Primitives;
 using Zynt.Payment.Test.Common;
 
@@ -19,7 +20,7 @@ internal class AnotherFakePaymentService : IPaymentService
         Name = ServiceName,
     };
 
-    public Task<PaymentRequestUrls> CreatePaymentUrlAsync(PaymentRequest request)
+    public Task<PaymentRequestUrls> CreatePaymentUrlAsync(PaymentRequest request, PaymentContext context)
     {
         ThrowHelpers.ThrowIfRedirectUrlNotInitialized(request);
         return Task.FromResult(CreatePaymentUrl(request));

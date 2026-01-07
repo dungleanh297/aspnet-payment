@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
 using Zynt.Payment.Exceptions;
 using Zynt.Payment.Interfaces;
+using Zynt.Payment.Models;
 using Zynt.Payment.Primitives;
 using Zynt.Payment.Registries;
 
@@ -22,6 +23,13 @@ internal class PaymentFacade : IPaymentFacade
     {
         ArgumentNullException.ThrowIfNull(request, nameof(request));
 
+        PaymentContext? context = _serviceProvider.GetRequiredService<IPaymentContextAccessor>().Value;
+
+        if (context is null)
+        {
+            throw new InvalidOperationException($"{nameof(PaymentContext)} is not available from {nameof(IPaymentContextAccessor)}.");
+        }
+
         if (!_serviceRegistry.TryGetServiceTypeInfo(request.ServiceName, out var serviceTypeInfo))
         {
             throw new PaymentServiceNotFoundException(request, $"Unable to find payment service with service name: {request.ServiceName}");
@@ -33,7 +41,8 @@ internal class PaymentFacade : IPaymentFacade
         }
 
         var paymentService = Unsafe.As<IPaymentService>(_serviceProvider.GetRequiredService(serviceTypeInfo.Type));
-        var result = paymentService.CreatePaymentUrlAsync(request);
+
+        var result = paymentService.CreatePaymentUrlAsync(request, context);
 
         return result;
 

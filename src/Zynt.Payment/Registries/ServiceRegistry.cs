@@ -7,16 +7,18 @@ namespace Zynt.Payment.Registries;
 
 internal sealed class ServiceRegistry
 {
-    private readonly Dictionary<string, ServiceTypeInfo> _servicesTypes = [];
-    private readonly List<PaymentServiceDescriptor> _descriptors = [];
     private readonly List<Action<IEndpointRouteBuilder>> _webhookConfiguring = [];
+
+    internal Dictionary<string, ServiceTypeInfo> ServicesTypes { get; } = [];
+
+    internal List<PaymentServiceDescriptor> Descriptors { get; } = [];
 
     public void AddService<TService>(PaymentServiceDescriptor descriptor, Action<IEndpointRouteBuilder> webhookConfiguring) where TService : IPaymentService
     {
         ArgumentNullException.ThrowIfNull(descriptor, nameof(descriptor));
         ArgumentNullException.ThrowIfNull(webhookConfiguring, nameof(webhookConfiguring));
 
-        _descriptors.Add(descriptor);
+        Descriptors.Add(descriptor);
         _webhookConfiguring.Add(webhookConfiguring);
 
         var serviceTypeInfo = new ServiceTypeInfo
@@ -25,17 +27,17 @@ internal sealed class ServiceRegistry
             Type = typeof(TService),
         };
 
-        _servicesTypes.Add(descriptor.Name, serviceTypeInfo);
+        ServicesTypes.Add(descriptor.Name, serviceTypeInfo);
     }
 
     public bool TryGetServiceTypeInfo(string serviceName, [NotNullWhen(true)] out ServiceTypeInfo serviceTypeInfo)
     {
-        return _servicesTypes.TryGetValue(serviceName, out serviceTypeInfo);
+        return ServicesTypes.TryGetValue(serviceName, out serviceTypeInfo);
     }
 
     public IEnumerable<PaymentServiceDescriptor> GetAllServices()
     {
-        return _descriptors;
+        return Descriptors;
     }
 
     public void ConfigureWebhook(IEndpointRouteBuilder routeBuilder)

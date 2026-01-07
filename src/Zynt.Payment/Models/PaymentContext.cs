@@ -1,11 +1,10 @@
-using Microsoft.AspNetCore.Http;
-using Zynt.Payment.Interfaces;
+using System.Net;
 
 namespace Zynt.Payment.Models;
 
-internal class PaymentContext : IPaymentContext
+public class PaymentContext
 {
-    public required ConnectionInfo Connection { get; set; }
+    public IPAddress? RemoteIpAddress { get; set; }
 
-    public required string BaseUrl { get; set; }
+    public string BaseUrl { get; set; } = null!;
 }

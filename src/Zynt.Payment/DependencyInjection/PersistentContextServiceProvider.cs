@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Zynt.Payment.DependencyInjection;
 
-internal sealed class PersistentContextServiceProvider<TContext> : IServiceProvider, IWrapped<IServiceProvider> where TContext : class
+internal sealed class PersistentContextServiceProvider<TContext> : IServiceProvider, IDecorating<IServiceProvider> where TContext : class
 {
     private readonly IServiceProvider _serviceProvider;
 

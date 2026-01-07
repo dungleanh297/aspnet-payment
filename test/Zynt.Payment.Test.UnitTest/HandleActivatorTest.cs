@@ -1,38 +1,34 @@
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Zynt.Payment.Attributes;
 using Zynt.Payment.Extensions;
 using Zynt.Payment.Interfaces;
-using Zynt.Payment.Test.UnitTest;
 
 namespace Zynt.Payment.Test;
 
 [TestClass]
 public class HandleActivatorTest
 {
-    private ServiceProvider _serviceProvider = null!;
-    private IServiceScope _serviceScope = null!;
     private IPaymentHandleActivator _handleActivator = null!; 
     private HandlerStateCollection _states = null!;
-    public IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
-
+    
     [TestInitialize]
     public void CreateServiceProvider()
     {
-        var serviceCollection = Helpers.CreateServiceCollectionWithPayment()
+        var serviceProvider = Helpers.CreateServiceCollectionWithPayment()
             .AddPayment()
-            .AddHandlers(typeof(AssemblyReference).Assembly).Services;
-
-        _serviceProvider = serviceCollection.BuildServiceProvider();
-        _serviceScope = _serviceProvider.CreateScope();
-        _handleActivator = ServiceProvider.GetRequiredService<IPaymentHandleActivator>();
-        _states = ServiceProvider.GetRequiredService<HandlerStateCollection>();
+            .AddHandlers(typeof(AssemblyReference).Assembly).Services.BuildServiceProvider();
+        
+        _handleActivator = serviceProvider.GetRequiredService<IPaymentHandleActivator>();
+        _states = serviceProvider.GetRequiredService<HandlerStateCollection>();
     }
 
     [TestMethod]
-    [DataRow(SuccessHandler.HandlerName, false)]
-    [DataRow(AsyncDisposableSuccessHandler.HandlerName, true)]
-    [DataRow(DisposableSuccessHandler.HandlerName, true)]
-    [DataRow(MultipleDisposableSuccessHandler.HandlerName, true)]
-    public async Task InvokeHandler_SuccessResult(string handlerName, bool isDisposable)
+    [DataRow(SuccessHandler.HandlerName, false, false)]
+    [DataRow(AsyncDisposableSuccessHandler.HandlerName, true, true)]
+    [DataRow(DisposableSuccessHandler.HandlerName, true, false)]
+    [DataRow(MultipleDisposableSuccessHandler.HandlerName, true, true)]
+    public async Task InvokeHandler_SuccessResult(string handlerName, bool isDisposable, bool shouldAsyncDisposable)
     { 
         var result = new PaymentResult
         {
@@ -50,7 +46,7 @@ public class HandleActivatorTest
         var handlerState = _states.Single().Value;
 
         Assert.AreEqual(1, _states.Count, "Two or more handler has been created at the same time");
-        Assert.AreEqual(handlerName, HandlerUtilities.GetHandlerNameFromType(handlerState.HandlerType), "Activator invoked wrong handler");
+        Assert.AreEqual(handlerName, GetHandlerNameFromType(handlerState.HandlerType), "Activator invoked wrong handler");
         Assert.IsTrue(handlerState.InvokedSuccessHandler, "Handler name hasn't been invoked");
         Assert.AreEqual(result, handlerState.Result, $"Wrong payload {nameof(PaymentResult)} has been passed to handler");
 
@@ -58,42 +54,40 @@ public class HandleActivatorTest
         {
             Assert.IsTrue(handlerState.Disposed, "Handler hasn't disposed!");
         }
+
+        if (shouldAsyncDisposable)
+        {
+            Assert.IsTrue(handlerState.DisposedWithAsyncDisposable, "Handler should be disposed with ASyncDisposable");
+        }
     }
 
     [TestMethod]
     public async Task InvokeHandler_FailureResult()
     {
-        try
+        foreach (var status in Enum.GetValues<PaymentStatus>().Where(e => e != PaymentStatus.Success).ToArray())
         {
-            foreach (var status in Enum.GetValues<PaymentStatus>().Where(e => e != PaymentStatus.Success).ToArray())
+            await _handleActivator.InvokeAsync(new PaymentResult
             {
-                await _handleActivator.InvokeAsync(new PaymentResult
-                {
-                    Amount = 12000,
-                    Currency = "VND",
-                    CreatedDate = DateTime.Now,
-                    HandlerName = SuccessHandler.HandlerName,
-                    Identifier = "120000",
-                    ServiceName = "test-service",
-                    Status = status,
-                });
-            }
-
-            if (_states.Count != 0)
-            {
-                Assert.Fail("No handler should be invoked");
-            }
-
-        } catch (Exception)
-        {
-            
+                Amount = 12000,
+                Currency = "VND",
+                CreatedDate = DateTime.Now,
+                HandlerName = SuccessHandler.HandlerName,
+                Identifier = "120000",
+                ServiceName = "test-service",
+                Status = status,
+            });
         }
+
+        Assert.AreEqual(0, _states.Count, "No handler should be invoked when result's status is not success!");
     }
 
-    [TestCleanup]
-    public void DisposeServiceProvider()
+    private static string? GetHandlerNameFromType(Type type)
     {
-        _serviceProvider.Dispose();
-        _serviceScope.Dispose();
+        if (!type.IsAssignableTo(typeof(IPaymentSuccessHandler)))
+        {
+            return null;
+        }
+
+        return type.GetCustomAttribute<PaymentHandlerAttribute>()?.Name;
     }
 }
