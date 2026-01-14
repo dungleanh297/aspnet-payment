@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Zynt.Payment.Interfaces;
 using Zynt.Payment.Registries;
 
@@ -20,10 +20,10 @@ internal class PaymentBuilder : IPaymentBuilder
         _handlerRegistry = handlerRegistry;
     }
 
-    public IPaymentBuilder AddService<TService>(PaymentServiceDescriptor descriptor, Action<IEndpointRouteBuilder> webhookConfiguring) where TService : class, IPaymentService
+    public IPaymentBuilder AddService<TService>(PaymentServiceDescriptor descriptor) where TService : class, IPaymentService
     {
-        Services.AddTransient<TService>();
-        _serviceRegistry.AddService<TService>(descriptor, webhookConfiguring);
+        Services.TryAddTransient<TService>();
+        _serviceRegistry.AddService<TService>(descriptor);
         return this;
     }
 

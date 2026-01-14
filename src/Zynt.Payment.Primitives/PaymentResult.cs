@@ -17,7 +17,7 @@ public sealed class PaymentResult : IEquatable<PaymentResult>
         }
     }
 
-    public DateTimeOffset CreatedDate { get; init; }
+    public required DateTimeOffset CreatedDate { get; init; }
     
     public required string Currency { get; init; }
 
@@ -27,7 +27,9 @@ public sealed class PaymentResult : IEquatable<PaymentResult>
     
     public required string ServiceName { get; init; }
     
-    public PaymentStatus Status { get; init; }
+    public PaymentStatus Status { get; init; } = PaymentStatus.Success;
+
+    public Dictionary<string, object>? Metadata { get; init; }
 
     public override int GetHashCode()
     {

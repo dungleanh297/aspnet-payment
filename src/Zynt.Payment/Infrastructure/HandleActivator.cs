@@ -21,7 +21,7 @@ internal sealed class HandleActivator : IPaymentHandleActivator
     {
         if (!_handlerRegistry.TryGetImplementationInfo(result.HandlerName, out var handlerInfo))
         {
-            throw new PaymentHandlerNotFoundException(null, result, $"Cannot find the handler implementation with name \"{result.HandlerName}\"");
+            throw new PaymentHandlerNotFoundException(null, result, $"Cannot find the handler implementation with name '{result.HandlerName}'");
         }
 
         Task handlerTask = Task.CompletedTask;
@@ -36,7 +36,12 @@ internal sealed class HandleActivator : IPaymentHandleActivator
             handlerTask = Unsafe.As<IPaymentSuccessHandler>(handler).OnTransactionSuccessAsync(result);
         }
 
-        return (isDisposable || isAsyncDisposable) ? AwaitThenDispose(handlerTask, handler, isAsyncDisposable) : handlerTask;
+        if (handlerTask is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return (isDisposable || isAsyncDisposable) ? AwaitThenDispose(handlerTask, handler!, isAsyncDisposable) : handlerTask;
     }
 
     private static async Task AwaitThenDispose(Task task, object handler, bool isAsyncDisposable)

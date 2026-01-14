@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Zynt.Payment.Attributes;
 using Zynt.Payment.DependencyInjection;
 using Zynt.Payment.Interfaces;
 using Zynt.Payment.Models;
 using Zynt.Payment.Registries;
+using static Zynt.Payment.Constants;
 
 namespace Zynt.Payment.Infrastructure;
 
@@ -24,6 +26,8 @@ internal class PaymentMiddleware : IMiddleware
     {
         Endpoint? endpoint = context.GetEndpoint();
 
+        ILogger<PaymentMiddleware>? logger = context.RequestServices.GetService<ILogger<PaymentMiddleware>>();
+
         if (endpoint == null)
         {
             return next(context);
@@ -41,11 +45,21 @@ internal class PaymentMiddleware : IMiddleware
 
         if (endpoint.Metadata.GetMetadata<PaymentRedirectionHandlerAttribute>() is not null)
         {
-            string? providerName = context.Request.Query["provider"];
+            string? paymentServiceName = context.Request.Query[ServiceQueryParameterName];
 
-            if (providerName is null || _serviceRegistry.TryGetServiceTypeInfo(providerName, out var serviceTypeInfo))
+            // Do not write anything to the response, let the endpoint decide what to do
+            if (paymentServiceName is null)
             {
-                return TypedResults.BadRequest().ExecuteAsync(context);
+                logger?.LogWarning("Payment service name has not been provided in the redirection request.");
+                context.Features.Set(PaymentRedirectionResult.MissingServiceName);
+                return next(context);
+            }
+
+            if (!_serviceRegistry.TryGetServiceTypeInfo(paymentServiceName, out var serviceTypeInfo))
+            {
+                logger?.LogWarning("Unrecognized payment service name: '{PaymentServiceName}'.", paymentServiceName);
+                context.Features.Set(PaymentRedirectionResult.UnknownServiceName);
+                return next(context);
             }
 
             var paymentService = (IPaymentService) context.RequestServices.GetRequiredService(serviceTypeInfo.Type);
@@ -83,7 +97,16 @@ internal class PaymentMiddleware : IMiddleware
         if (resultAsTask.IsCompleted)
         {
             PaymentResult? result = resultAsTask.Result;
-            context.Features.Set(result);
+
+            if (result is null)
+            {
+                context.Features.Set(PaymentRedirectionResult.InvalidRedirectionData);
+            }
+            else
+            {
+                context.Features.Set(new PaymentRedirectionResult(result));
+            }
+
             return next(context);
         }
 
@@ -92,7 +115,14 @@ internal class PaymentMiddleware : IMiddleware
         static async Task AwaitResult(Task<PaymentResult?> resultAsTask, HttpContext context, RequestDelegate next)
         {
             var result = await resultAsTask;
-            context.Features.Set(result);
+            if (result is null)
+            {
+                context.Features.Set(PaymentRedirectionResult.InvalidRedirectionData);
+            }
+            else
+            {
+                context.Features.Set(new PaymentRedirectionResult(result));
+            }
             await next(context);
         }
     }

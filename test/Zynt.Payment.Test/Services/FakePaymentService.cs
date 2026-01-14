@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Routing;
 using System.Net;
 using Zynt.Payment.Interfaces;
 using Zynt.Payment.Models;
@@ -8,6 +9,7 @@ using Zynt.Payment.Test.Common;
 
 namespace Zynt.Payment.Test;
 
+[Obsolete]
 public class FakePaymentService : IPaymentService
 {
     public static readonly string[] SupportedCurrencies = [Constants.VNDCurrencyCode, Constants.USDCurrencyCode];
@@ -57,7 +59,11 @@ public class FakePaymentService : IPaymentService
                 $"https://fakepayment.com/pay?amount={request.Amount}&currency={request.Currency}&handler={request.HandlerName}&identifier={WebUtility.UrlEncode(request.Identifier)}&redirectTo={WebUtility.UrlEncode(request.RedirectUrl)}",
             Deeplink = $"fakepayment://pay?amount={request.Amount}&currency={request.Currency}&handler={request.HandlerName}&identifier={WebUtility.UrlEncode(request.Identifier)}&redirectTo={WebUtility.UrlEncode(request.RedirectUrl)}",
         };
+    }
 
+    public void ConfigureWebhook(IEndpointRouteBuilder routeBuilder)
+    {
+        throw new NotImplementedException();
     }
 }
 

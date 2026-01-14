@@ -1,30 +1,34 @@
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.AspNetCore.Routing;
 using Zynt.Payment.Interfaces;
-using Zynt.Payment.Registries;
 
 namespace Zynt.Payment.Registries;
 
 internal sealed class ServiceRegistry
 {
-    private readonly List<Action<IEndpointRouteBuilder>> _webhookConfiguring = [];
-
     internal Dictionary<string, ServiceTypeInfo> ServicesTypes { get; } = [];
 
     internal List<PaymentServiceDescriptor> Descriptors { get; } = [];
 
-    public void AddService<TService>(PaymentServiceDescriptor descriptor, Action<IEndpointRouteBuilder> webhookConfiguring) where TService : IPaymentService
+    public void AddService<TService>(PaymentServiceDescriptor descriptor) where TService : IPaymentService
+    {
+        AddService(typeof(TService), descriptor);
+    }
+
+    public void AddService(Type serviceType, PaymentServiceDescriptor descriptor)
     {
         ArgumentNullException.ThrowIfNull(descriptor, nameof(descriptor));
-        ArgumentNullException.ThrowIfNull(webhookConfiguring, nameof(webhookConfiguring));
+
+        if (!serviceType.IsAssignableTo(typeof(IPaymentService)))
+        {
+            throw new ArgumentException($"{serviceType.FullName} registered as payment service. But it is not implement {nameof(IPaymentService)}");
+        }
 
         Descriptors.Add(descriptor);
-        _webhookConfiguring.Add(webhookConfiguring);
 
         var serviceTypeInfo = new ServiceTypeInfo
         {
             Currencies = descriptor.Currencies,
-            Type = typeof(TService),
+            Type = serviceType,
         };
 
         ServicesTypes.Add(descriptor.Name, serviceTypeInfo);
@@ -38,14 +42,6 @@ internal sealed class ServiceRegistry
     public IEnumerable<PaymentServiceDescriptor> GetAllServices()
     {
         return Descriptors;
-    }
-
-    public void ConfigureWebhook(IEndpointRouteBuilder routeBuilder)
-    {
-        foreach (var config in _webhookConfiguring)
-        {
-            config(routeBuilder);
-        }
     }
 }
 
@@ -61,6 +57,7 @@ internal readonly struct ServiceTypeInfo
         {
             return false;
         }
+
         if (Currencies is null || Currencies.Length == 0)
         {
             return true;
